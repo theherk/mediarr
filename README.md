@@ -30,11 +30,13 @@ This is done with a single user, whose ID is given in [.env](.env). All services
 /volume1/the-seas
 ├── torrents
 │   ├── audiobooks
+│   ├── books
 │   ├── movies
 │   ├── music
 │   └── tv
 └── media
     ├── audiobooks
+    ├── books
     ├── movies
     ├── music
     └── tv
