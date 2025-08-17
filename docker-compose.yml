@@ -1,7 +1,44 @@
 version: "3.8"
 
 services:
-  # Download Clients
+  # VPN Container - Routes qBittorrent through ProtonVPN
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
+    networks:
+      default:
+        aliases:
+          - qbittorrent
+          - prowlarr
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - PORT_FORWARD_ONLY=on
+      - VPN_PORT_FORWARDING=on
+      - FIREWALL=on
+      - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS}
+      - LOG_LEVEL=debug
+      - SERVER_COUNTRIES=Netherlands
+    ports:
+      - 8080:8080 # qBittorrent Web UI
+      - 9696:9696 # Prowlarr Web UI
+      - 8000:8000 # Gluetun control server
+    volumes:
+      - ${CONFIG_ROOT}/gluetun:/gluetun
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    restart: unless-stopped
+
+  # Download Clients - Routes through VPN
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
