@@ -100,6 +100,75 @@ Restores configurations from backup tarballs:
 - Use dry-run mode first to verify restore contents
 - Consider adding backup script to cron for regular backups
 
-## Networking
+## inotify Configuration for Jellyfin
 
-Outside the scope of this repository, we should already have a VPN setup and connected, and a firewall set of rules functioning as a kill-switch such that no traffic can reach outside our network via the LAN, thus forcing the traffic to transit the VPN.
+Jellyfin's real-time monitoring requires increased inotify limits on Synology NAS to prevent directory watcher errors. Create these scheduled tasks in DSM:
+
+### Task 1: Increase max_user_watches
+
+- **Task**: `inotify_watches`
+- **User**: `root`
+- **Command**: `sh -c '(sleep 90 && echo 204800 > /proc/sys/fs/inotify/max_user_watches)&'`
+- **Schedule**: Run on boot
+
+### Task 2: Increase max_user_instances
+
+- **Task**: `inotify_instances`
+- **User**: `root`
+- **Command**: `sh -c '(sleep 90 && echo 512 > /proc/sys/fs/inotify/max_user_instances)&'`
+- **Schedule**: Run on boot
+
+These tasks increase the kernel limits needed for Jellyfin to monitor large media directories and detect new files in real-time.
+
+## WireGuard Kernel Module Installation (Synology Required)
+
+Synology NAS devices require a custom WireGuard kernel module for proper VPN container functionality:
+
+### Install WireGuard SPK:
+
+1. **Download the correct module** for your Synology model from [BlackVoid Club](https://www.blackvoid.club/wireguard-spk-for-your-synology-nas/)
+2. **Follow their installation instructions** carefully for your specific DSM version and CPU architecture
+3. **Reboot your NAS** after installation
+4. **SSH as root** and run the startup script as instructed on their page
+5. **Verify installation** by checking if WireGuard module is loaded:
+   ```bash
+   lsmod | grep wireguard
+   ```
+
+**Important Notes:**
+- **Must reboot AND run startup script** - installation alone is not sufficient
+- If upgrading DSM versions, **uninstall and reinstall** the WireGuard module
+- Without this kernel module, Gluetun will cause system hangs and container management issues
+
+## VPN Kill Switch Configuration
+
+For secure torrenting with private trackers, the main Docker compose file includes VPN configuration that routes qBittorrent and Prowlarr through the VPN container:
+
+```bash
+echo "WIREGUARD_PRIVATE_KEY=your_private_key_here" >> .env
+```
+
+### How the Kill Switch Works
+
+The VPN kill switch is built into the Docker configuration and doesn't require additional firewall rules:
+
+#### Automatic Protection:
+- **qBittorrent uses `network_mode: "service:gluetun"`** - all traffic must go through the VPN container
+- **If Gluetun stops, qBittorrent loses internet access** - complete network isolation
+- **Gluetun has internal firewall** (`FIREWALL=on`) that blocks non-VPN traffic
+- **Other services use direct connections** - not affected by VPN issues
+
+#### Verification:
+```bash
+# Check qBittorrent uses VPN IP (should show ProtonVPN IP)
+docker exec qbittorrent  wget -qO- https://ipinfo.io/ip
+docker exec gluetun wget -qO- https://ipinfo.io/ip
+
+# Check host uses real IP (should show your real IP)
+curl -s https://ipinfo.io/ip
+
+# Test kill switch - stop VPN and verify qBittorrent loses internet
+docker stop gluetun
+docker exec qbittorrent  wget -qO- https://ipinfo.io/ip
+docker start gluetun
+```
