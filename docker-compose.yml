@@ -25,7 +25,6 @@ services:
       - VPN_PORT_FORWARDING=on
       - FIREWALL=on
       - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS}
-      - LOG_LEVEL=debug
       - SERVER_COUNTRIES=Netherlands
     ports:
       - 8080:8080 # qBittorrent Web UI
@@ -42,6 +41,7 @@ services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
+    network_mode: "service:gluetun" # All traffic goes through VPN container
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -50,24 +50,23 @@ services:
     volumes:
       - ${CONFIG_ROOT}/qbittorrent:/config
       - ${DATA_ROOT}:/downloads
-    ports:
-      - 8080:8080
-      - 6881:6881
-      - 6881:6881/udp
+    depends_on:
+      - gluetun
     restart: unless-stopped
 
-  # Indexer Management
+  # Indexer Management - Routes through VPN for consistent IP with private trackers
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
+    network_mode: "service:gluetun"
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
       - ${CONFIG_ROOT}/prowlarr:/config
-    ports:
-      - 9696:9696
+    depends_on:
+      - gluetun
     restart: unless-stopped
 
   # Cloudflare Solver
@@ -182,7 +181,6 @@ services:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
     environment:
-      - LOG_LEVEL=debug
       - TZ=${TZ}
     volumes:
       - ${CONFIG_ROOT}/jellyseerr:/app/config
@@ -206,6 +204,30 @@ services:
     ports:
       - 7575:7575
     restart: unless-stopped
+
+  # ProtonVPN Automatic Port Management
+  qbittorrent-natmap:
+    # https://github.com/soxfor/qbittorrent-natmap
+    image: ghcr.io/soxfor/qbittorrent-natmap:latest
+    container_name: qbittorrent-natmap
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - TZ=${TZ}
+      - QBITTORRENT_SERVER=localhost
+      - QBITTORRENT_PORT=8080
+      - VPN_GATEWAY=10.2.0.1
+      - VPN_CT_NAME=gluetun
+      - VPN_IF_NAME=tun0
+      - CHECK_INTERVAL=300
+      - NAT_LEASE_LIFETIME=300
+    network_mode: service:gluetun
+    depends_on:
+      qbittorrent:
+        condition: service_started
+      gluetun:
+        condition: service_healthy
 
 networks:
   default:
