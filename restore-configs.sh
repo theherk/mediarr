@@ -107,10 +107,10 @@ if [ "$DRY_RUN" = false ]; then
 fi
 
 # Check if services are running
-RUNNING_SERVICES=$(docker-compose ps -q 2>/dev/null | wc -l)
+RUNNING_SERVICES=$(docker compose ps -q 2>/dev/null | wc -l)
 if [ "$RUNNING_SERVICES" -gt 0 ] && [ "$DRY_RUN" = false ]; then
     echo -e "${YELLOW}⚠️  Warning: Docker services are currently running${NC}"
-    echo -e "${YELLOW}💡 Consider stopping them first: docker-compose down${NC}"
+    echo -e "${YELLOW}💡 Consider stopping them first: docker compose down${NC}"
     echo ""
     read -p "Continue anyway? (y/N): " -n 1 -r
     echo
@@ -143,8 +143,8 @@ else
         echo -e "\n${GREEN}🎉 Restore completed successfully!${NC}"
         echo -e "\n${YELLOW}📖 Next steps:${NC}"
         echo -e "   1. Review restored configurations"
-        echo -e "   2. Start services: ${GREEN}docker-compose up -d${NC}"
-        echo -e "   3. Check service logs: ${GREEN}docker-compose logs${NC}"
+        echo -e "   2. Start services: ${GREEN}docker compose up -d${NC}"
+        echo -e "   3. Check service logs: ${GREEN}docker compose logs${NC}"
 
     else
         echo -e "${RED}❌ Error during restore${NC}"

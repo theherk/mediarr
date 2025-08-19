@@ -120,6 +120,35 @@ Jellyfin's real-time monitoring requires increased inotify limits on Synology NA
 
 These tasks increase the kernel limits needed for Jellyfin to monitor large media directories and detect new files in real-time.
 
+## Quality Profile Management with Recyclarr
+
+Recyclarr automatically syncs TRaSH Guide quality profiles and custom formats to Sonarr and Radarr:
+
+### Setup
+
+1. **Get API keys** from Sonarr (Settings → General → Security) and Radarr (Settings → General → Security)
+2. **Add to `config/recyclarr/secrets.yml`**:
+   ```yaml
+   sonarr_base_url: http://sonarr:8989
+   sonarr_apikey: your_sonarr_api_key
+   radarr_base_url: http://radarr:7878
+   radarr_apikey: your_radarr_api_key
+   ```
+
+### Load Profiles
+
+```bash
+# Start services first
+docker compose up -d sonarr radarr
+
+# Sync TRaSH Guide profiles (run once, then monthly)
+docker compose run --rm recyclarr recyclarr sync
+```
+
+This creates optimized quality profiles:
+- **Sonarr**: WEB-1080p (prioritizes web releases, good audio, blocks low quality)
+- **Radarr**: HD Bluray + WEB (prioritizes Bluray > WEB, comprehensive quality scoring)
+
 ## WireGuard Kernel Module Installation (Synology Required)
 
 Synology NAS devices require a custom WireGuard kernel module for proper VPN container functionality:

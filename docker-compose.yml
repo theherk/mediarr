@@ -205,6 +205,17 @@ services:
       - 7575:7575
     restart: unless-stopped
 
+  # Quality Profile Management
+  recyclarr:
+    image: ghcr.io/recyclarr/recyclarr:latest
+    container_name: recyclarr
+    environment:
+      - TZ=${TZ}
+    user: ${PUID}:${PGID}
+    volumes:
+      - ${CONFIG_ROOT}/recyclarr:/config
+    restart: "no"
+
   # ProtonVPN Automatic Port Management
   qbittorrent-natmap:
     # https://github.com/soxfor/qbittorrent-natmap
