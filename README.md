@@ -12,6 +12,7 @@ Setup a tailored set of services including the following on a Synology NAS.
 - [qBittorrent](https://www.qbittorrent.org/)
 - [Jellyfin](https://jellyfin.org/)
 - [Jellyseerr](https://github.com/Fallenbagel/jellyseerr)
+- [Cleanuparr](https://github.com/Cleanuparr/Cleanuparr)
 
 This is done with a single user, whose ID is given in [.env](.env). All services, use their expected default ports. Use bridge networking so we can reach other containers given there name.
 

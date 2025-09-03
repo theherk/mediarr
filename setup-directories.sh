@@ -2,7 +2,7 @@
 
 set -e
 
-mkdir -p ~/.config/{audiobookshelf,bazarr,gluetun,jellyfin,jellyseerr,homarr,lidarr,prowlarr,qbittorrent,radarr,recyclarr,sonarr}
+mkdir -p ~/.config/{audiobookshelf,bazarr,cleanuparr,gluetun,jellyfin,jellyseerr,homarr,lidarr,prowlarr,qbittorrent,radarr,recyclarr,sonarr}
 mkdir -p ~/.config/homarr/{configs,icons,data}
 mkdir -p ~/.config/audiobookshelf/metadata
 sudo mkdir -p /volume1/the-seas/media/{audiobooks,books,movies,music,tv}

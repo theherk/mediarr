@@ -39,7 +39,7 @@ if [ -f ".env" ]; then
 fi
 
 # Add service configs that exist
-SERVICES=(sonarr radarr bazarr lidarr audiobookshelf homarr prowlarr qbittorrent jellyfin jellyseerr)
+SERVICES=(sonarr radarr bazarr lidarr audiobookshelf homarr prowlarr qbittorrent jellyfin jellyseerr cleanuparr)
 
 for service in "${SERVICES[@]}"; do
     CONFIG_PATH=".config/${service}"

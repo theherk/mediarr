@@ -218,6 +218,20 @@ services:
       - ${CONFIG_ROOT}/recyclarr:/config
     restart: "no"
 
+  # Queue Cleanup Automation
+  cleanuparr:
+    image: ghcr.io/cleanuparr/cleanuparr:latest
+    container_name: cleanuparr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_ROOT}/cleanuparr:/config
+    ports:
+      - 11011:11011
+    restart: unless-stopped
+
   # ProtonVPN Automatic Port Management
   qbittorrent-natmap:
     # https://github.com/soxfor/qbittorrent-natmap
