@@ -233,3 +233,95 @@ docker stop gluetun
 docker exec qbittorrent  wget -qO- https://ipinfo.io/ip
 docker start gluetun
 ```
+
+## Troubleshooting
+
+This troubleshooting guide was written in panicky haste, so it maybe incorrect in places.
+
+### Synology DSM "System is getting ready" Hung on Boot
+
+If DSM shows "System is getting ready" for extended periods (30+ minutes) after a reboot, especially following Docker/qBittorrent I/O issues:
+
+#### Symptoms:
+- DSM web interface shows "System is getting ready" indefinitely
+- SSH access works but web UI won't load
+- `docker compose logs` or `docker inspect` commands hang
+- System logs show messages like:
+  ```
+  INFO: task qbittorrent-nox:19976 blocked for more than 120 seconds
+  ```
+
+#### Solution:
+1. **SSH into the Synology** (this usually works even when web UI doesn't)
+2. **Force complete the boot sequence**:
+   ```bash
+   sudo synobootseq --set-boot-done
+   sudo synobootseq --is-ready  # Should now show "Boot done"
+   ```
+3. **Web interface should immediately become accessible**
+
+#### Root Cause:
+This occurs when:
+- Docker containers (especially qBittorrent) create I/O deadlock
+- System crashes or is force-rebooted during heavy I/O operations
+- Boot state file doesn't get written properly during shutdown
+- System remains stuck in "shutting down" state after reboot
+
+### Preventing qBittorrent I/O Deadlock
+
+To avoid system hangs caused by excessive torrent I/O on Synology with BTRFS:
+
+#### Configure qBittorrent limits:
+1. **Access qBittorrent Web UI** (port 8080)
+2. **Options → Downloads**:
+   - Global maximum number of connections: **100-200** (not unlimited)
+   - Maximum active downloads: **3-5**
+   - Maximum active torrents: **10**
+3. **Options → Advanced**:
+   - Disk cache: **32-64 MB**
+   - Disk cache expiry: **60 seconds**
+
+#### Add Docker resource limits to `docker-compose.yml`:
+```yaml
+qbittorrent:
+  # ... existing configuration ...
+  mem_limit: 1g
+  cpus: '0.5'
+  ulimits:
+    nofile:
+      soft: 4096
+      hard: 8192
+```
+
+#### Consider filesystem alternatives:
+- **BTRFS**: Poor performance with torrents due to Copy-on-Write overhead
+- **EXT4**: Much better for heavy I/O workloads, faster recovery after crashes
+
+### If Docker Commands Hang
+
+When `docker ps`, `docker compose logs`, or similar commands hang indefinitely:
+
+1. **Check for I/O wait**:
+   ```bash
+   uptime  # Look for high I/O wait percentages
+   dmesg | tail -50  # Check for hung task warnings
+   ```
+
+2. **Force restart Docker/Container Manager**:
+   ```bash
+   sudo synopkg restart ContainerManager
+   # If that hangs:
+   sudo killall -9 dockerd containerd
+   sudo synoservice --restart pkgctl-ContainerManager
+   ```
+
+3. **Last resort - Force reboot**:
+   - Hold physical power button for 4 seconds (controlled shutdown)
+   - If no response after 2 minutes, hold for 10+ seconds (force power off)
+   - Wait 60 seconds before powering back on
+   - After reboot, run `sudo synobootseq --set-boot-done` if needed
+
+```bash
+sudo cat /proc/flashcache/*/flashcache_stats
+sudo dmsetup status | grep -i cache
+```
