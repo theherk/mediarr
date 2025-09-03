@@ -163,7 +163,7 @@ Recyclarr automatically syncs TRaSH Guide quality profiles and custom formats to
 docker compose up -d sonarr radarr
 
 # Sync TRaSH Guide profiles (run once, then monthly)
-docker compose run --rm recyclarr recyclarr sync
+docker compose run --rm recyclarr sync
 ```
 
 This creates optimized quality profiles:
