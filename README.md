@@ -120,6 +120,26 @@ Jellyfin's real-time monitoring requires increased inotify limits on Synology NA
 
 These tasks increase the kernel limits needed for Jellyfin to monitor large media directories and detect new files in real-time.
 
+## Synology Startup Configuration
+
+For the `arr` user to have SSH access and services to start automatically on boot, create these scheduled tasks in DSM:
+
+### Task 1: Enable SSH for arr user
+
+- **Task**: `enable_ssh_arr`
+- **User**: `root`
+- **Command**: `sh -c '(sleep 30 && sed -i "s|arr:\([^:]*\):\([^:]*\):\([^:]*\):\([^:]*\):\([^:]*\):/sbin/nologin|arr:\1:\2:\3:\4:\5:/bin/sh|" /etc/passwd)&'`
+- **Schedule**: Run on boot
+
+### Task 2: Start mediarr services
+
+- **Task**: `start_mediarr_services`
+- **User**: `arr`
+- **Command**: `sh -c '(sleep 60 && cd /var/services/homes/arr/mediarr && docker compose up -d)&'`
+- **Schedule**: Run on boot
+
+The first task enables SSH access by changing the shell from `/sbin/nologin` to `/bin/sh` for the `arr` user. The second task starts all Docker services after a delay to ensure the system is fully initialized.
+
 ## Quality Profile Management with Recyclarr
 
 Recyclarr automatically syncs TRaSH Guide quality profiles and custom formats to Sonarr and Radarr:
@@ -163,6 +183,17 @@ Synology NAS devices require a custom WireGuard kernel module for proper VPN con
    ```bash
    lsmod | grep wireguard
    ```
+
+### TUN Module Startup Script:
+
+VPN containers also require the TUN kernel module. Create a scheduled task in DSM:
+
+- **Task**: `load_tun_module`
+- **User**: `root`
+- **Command**: `sh -c '(sleep 15 && insmod /lib/modules/tun.ko)&'`
+- **Schedule**: Run on boot
+
+This loads the TUN module needed for VPN tunnel functionality.
 
 **Important Notes:**
 - **Must reboot AND run startup script** - installation alone is not sufficient
