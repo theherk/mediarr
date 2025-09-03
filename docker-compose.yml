@@ -29,6 +29,7 @@ services:
     ports:
       - 8080:8080 # qBittorrent Web UI
       - 9696:9696 # Prowlarr Web UI
+      - 8191:8191 # FlareSolverr Web UI
       - 8000:8000 # Gluetun control server
     volumes:
       - ${CONFIG_ROOT}/gluetun:/gluetun
@@ -73,13 +74,14 @@ services:
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
+    network_mode: "service:gluetun"
     environment:
       - LOG_LEVEL=info
       - LOG_HTML=false
       - CAPTCHA_SOLVER=none
       - TZ=${TZ}
-    ports:
-      - 8191:8191
+    depends_on:
+      - gluetun
     restart: unless-stopped
 
   # Media Management
