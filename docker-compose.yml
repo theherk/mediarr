@@ -140,9 +140,9 @@ services:
       - TZ=${TZ}
     volumes:
       - ${CONFIG_ROOT}/chaptarr:/config
-      - ${MEDIA_ROOT}/books:/data/books
-      - ${MEDIA_ROOT}/audiobooks:/data/audiobooks
-      - ${DATA_ROOT}:/data/downloads
+      - ${MEDIA_ROOT}/books:/books
+      - ${MEDIA_ROOT}/audiobooks:/audiobooks
+      - ${DATA_ROOT}:/downloads
     ports:
       - 8789:8789
     restart: unless-stopped
