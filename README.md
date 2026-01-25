@@ -6,6 +6,7 @@ Setup a tailored set of services including the following on a Synology NAS.
 - [Radarr](https://radarr.video/)
 - [Bazarr](https://www.bazarr.media/)
 - [Lidarr](https://lidarr.audio/)
+- [Chaptarr](https://github.com/robertlordhood/chaptarr)
 - [Audiobookshelf](https://www.audiobookshelf.org/)
 - [Homarr](https://homarr.dev/)
 - [Prowlarr](https://wiki.servarr.com/prowlarr)
@@ -169,6 +170,35 @@ docker compose run --rm recyclarr sync
 This creates optimized quality profiles:
 - **Sonarr**: WEB-1080p (prioritizes web releases, good audio, blocks low quality)
 - **Radarr**: HD Bluray + WEB (prioritizes Bluray > WEB, comprehensive quality scoring)
+
+## Book & Audiobook Management with Chaptarr
+
+Chaptarr (a Readarr fork) automatically imports and organizes books and audiobooks from torrents. It handles both ebooks and audiobooks in a single instance with hardlinking.
+
+### Setup
+
+After starting Chaptarr for the first time, configure it via the web UI at `http://your-nas:8789`:
+
+1. **File Management Settings**:
+   - Set to use **hardlinks** (not move/copy)
+   - This preserves files in qBittorrent for seeding
+
+2. **Add Libraries**:
+   - **Books root path**: `/data/books`
+   - **Audiobooks root path**: `/data/audiobooks`
+
+3. **Download Clients**:
+   - Configure qBittorrent integration (optional, for direct interaction)
+
+4. **Import Settings**:
+   - Monitor `/data/downloads/torrents/books` for ebook imports
+   - Monitor `/data/downloads/torrents/audiobooks` for audiobook imports
+
+### File Retention
+
+- Files are hardlinked from `/data/downloads/torrents/{books,audiobooks}` to `/data/{books,audiobooks}`
+- **Files remain in qBittorrent** after import and are not removed by Chaptarr
+- qBittorrent manages file deletion based on configured torrent limits and ratios
 
 ## WireGuard Kernel Module Installation (Synology Required)
 

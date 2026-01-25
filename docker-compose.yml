@@ -130,6 +130,23 @@ services:
       - 8686:8686
     restart: unless-stopped
 
+  # Book & Audiobook Management
+  chaptarr:
+    image: robertlordhood/chaptarr:latest
+    container_name: chaptarr
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - ${CONFIG_ROOT}/chaptarr:/config
+      - ${MEDIA_ROOT}/books:/data/books
+      - ${MEDIA_ROOT}/audiobooks:/data/audiobooks
+      - ${DATA_ROOT}:/data/downloads
+    ports:
+      - 8789:8789
+    restart: unless-stopped
+
   # Subtitle Management
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
