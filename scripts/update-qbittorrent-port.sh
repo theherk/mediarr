@@ -16,16 +16,21 @@ until wget -q --spider "http://${QBITTORRENT_HOST}/api/v2/app/version" 2>/dev/nu
 done
 
 echo "Setting qBittorrent listening port to ${PORT}"
-echo "API URL: http://${QBITTORRENT_HOST}/api/v2/app/setPreferences"
-echo "Payload: json={\"listen_port\":${PORT}}"
 
+# Capture both stdout and stderr separately
 response=$(wget -O- --post-data "json={\"listen_port\":${PORT}}" \
 	--header "Content-Type: application/json" \
-	"http://${QBITTORRENT_HOST}/api/v2/app/setPreferences" 2>&1)
+	"http://${QBITTORRENT_HOST}/api/v2/app/setPreferences" 2>/tmp/wget.err)
 
 exit_code=$?
+
 echo "Exit code: ${exit_code}"
-echo "Response: ${response}"
+echo "Response body: ${response}"
+if [ -f /tmp/wget.err ]; then
+	echo "Wget stderr:"
+	cat /tmp/wget.err
+	rm /tmp/wget.err
+fi
 
 if [ ${exit_code} -ne 0 ]; then
 	echo "Failed to set port"
