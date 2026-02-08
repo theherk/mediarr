@@ -23,6 +23,7 @@ services:
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
       - PORT_FORWARD_ONLY=on
       - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget --no-verbose --tries=10 --retry-connrefused -O- --post-data "json={\"listen_port\":$${PORTS}}" --header "Content-Type:application/json" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
       - FIREWALL=on
       - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS}
       - SERVER_COUNTRIES=Netherlands
@@ -248,30 +249,6 @@ services:
     ports:
       - 11011:11011
     restart: unless-stopped
-
-  # ProtonVPN Automatic Port Management
-  qbittorrent-natmap:
-    # https://github.com/soxfor/qbittorrent-natmap
-    image: ghcr.io/soxfor/qbittorrent-natmap:latest
-    container_name: qbittorrent-natmap
-    restart: unless-stopped
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-    environment:
-      - TZ=${TZ}
-      - QBITTORRENT_SERVER=localhost
-      - QBITTORRENT_PORT=8080
-      - VPN_GATEWAY=10.2.0.1
-      - VPN_CT_NAME=gluetun
-      - VPN_IF_NAME=tun0
-      - CHECK_INTERVAL=300
-      - NAT_LEASE_LIFETIME=300
-    network_mode: service:gluetun
-    depends_on:
-      qbittorrent:
-        condition: service_started
-      gluetun:
-        condition: service_healthy
 
 networks:
   default:
