@@ -23,7 +23,7 @@ services:
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
       - PORT_FORWARD_ONLY=on
       - VPN_PORT_FORWARDING=on
-      - VPN_PORT_FORWARDING_UP_COMMAND=/gluetun/scripts/update-qbittorrent-port.sh
+      - VPN_PORT_FORWARDING_UP_COMMAND=/gluetun/scripts/update-qbittorrent-port.sh {{PORT}}
       - FIREWALL=on
       - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS}
       - SERVER_COUNTRIES=Netherlands
