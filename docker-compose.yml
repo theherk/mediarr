@@ -23,7 +23,7 @@ services:
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
       - PORT_FORWARD_ONLY=on
       - VPN_PORT_FORWARDING=on
-      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c 'wget --no-verbose --tries=10 --retry-connrefused -O- --post-data "json={\"listen_port\":$${PORTS}}" --header "Content-Type:application/json" http://127.0.0.1:8080/api/v2/app/setPreferences 2>&1'
+      - VPN_PORT_FORWARDING_UP_COMMAND=/gluetun/scripts/update-qbittorrent-port.sh
       - FIREWALL=on
       - FIREWALL_OUTBOUND_SUBNETS=${FIREWALL_OUTBOUND_SUBNETS}
       - SERVER_COUNTRIES=Netherlands
@@ -34,6 +34,7 @@ services:
       - 8000:8000 # Gluetun control server
     volumes:
       - ${CONFIG_ROOT}/gluetun:/gluetun
+      - ./scripts:/gluetun/scripts:ro
     sysctls:
       - net.ipv6.conf.all.disable_ipv6=1
       - net.ipv4.conf.all.src_valid_mark=1
