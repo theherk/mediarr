@@ -1,20 +1,27 @@
 sonarr:
-  sonarr:
-    delete_old_custom_formats: true
-    replace_existing_custom_formats: true
+  web-1080p:
+    base_url: !secret sonarr_base_url
+    api_key: !secret sonarr_api_key
     quality_definition:
       type: series
-    include:
-      - template: sonarr-quality-definition-series
-      - template: sonarr-v4-quality-profile-web-1080p
-      - template: sonarr-v4-custom-formats-web-1080p
+    quality_profiles:
+      - trash_id: 72dae194fc92bf828f32cde7744e51a1
+        reset_unmatched_scores:
+          enabled: true
+    custom_format_groups:
+      add:
+        - trash_id: 158188097a58d7687dee647e04af0da3
+
 radarr:
-  radarr:
-    delete_old_custom_formats: true
-    replace_existing_custom_formats: true
+  hd-bluray-web:
+    base_url: !secret radarr_base_url
+    api_key: !secret radarr_api_key
     quality_definition:
       type: movie
-    include:
-      - template: radarr-quality-definition-movie
-      - template: radarr-quality-profile-hd-bluray-web
-      - template: radarr-custom-formats-hd-bluray-web
+    quality_profiles:
+      - trash_id: d1d67249d3890e49bc12e275d989a7e9
+        reset_unmatched_scores:
+          enabled: true
+    custom_format_groups:
+      add:
+        - trash_id: f8bf8eab4617f12dfdbd16303d8da245
