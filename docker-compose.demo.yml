@@ -118,16 +118,13 @@ services:
     restart: unless-stopped
 
   homarr:
-    image: ghcr.io/ajnart/homarr:latest
+    image: ghcr.io/homarr-labs/homarr:latest
     container_name: homarr
     environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
       - TZ=${TZ}
+      - SECRET_ENCRYPTION_KEY=${SECRET_ENCRYPTION_KEY}
     volumes:
-      - ${CONFIG_ROOT}/homarr/configs:/app/data/configs
-      - ${CONFIG_ROOT}/homarr/icons:/app/public/icons
-      - ${CONFIG_ROOT}/homarr/data:/data
+      - ${CONFIG_ROOT}/homarr/appdata:/appdata
     ports:
       - 7575:7575
     restart: unless-stopped
