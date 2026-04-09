@@ -4,7 +4,18 @@
 # Creates a timestamped tarball of all service configurations
 # Designed to run from home directory where configs are synced
 
-set -e
+set -euo pipefail
+
+# Tolerate tar warnings (e.g. "file changed as we read it")
+# Exit code 1 from tar means warnings, not failure
+tar_with_tolerance() {
+	local rc=0
+	tar "$@" || rc=$?
+	if [ "$rc" -gt 1 ]; then
+		return "$rc"
+	fi
+	return 0
+}
 
 # Configuration
 BACKUP_DIR="./backups"
@@ -39,7 +50,7 @@ if [ -f ".env" ]; then
 fi
 
 # Add service configs that exist
-SERVICES=(sonarr radarr bazarr lidarr audiobookshelf homarr prowlarr qbittorrent jellyfin jellyseerr chaptarr cleanuparr)
+SERVICES=(sonarr radarr bazarr lidarr audiobookshelf homarr prowlarr qbittorrent jellyfin jellyseerr seerr chaptarr cleanuparr)
 
 for service in "${SERVICES[@]}"; do
 	CONFIG_PATH=".config/${service}"
@@ -62,7 +73,7 @@ BACKUP_PATH="${BACKUP_DIR}/${BACKUP_NAME}"
 
 echo -e "${YELLOW}🔄 Creating tarball...${NC}"
 
-if tar -czf "${BACKUP_PATH}" "${BACKUP_ITEMS[@]}" 2>/dev/null; then
+if tar_with_tolerance -czf "${BACKUP_PATH}" "${BACKUP_ITEMS[@]}"; then
 	echo -e "${GREEN}✅ Backup created successfully!${NC}"
 
 	# Get backup size

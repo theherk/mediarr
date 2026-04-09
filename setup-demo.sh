@@ -6,7 +6,7 @@ DEMO_ROOT="$(cd "$(dirname "$0")" && pwd)/demo"
 
 echo "Creating demo directory tree under ${DEMO_ROOT} ..."
 
-mkdir -p "${DEMO_ROOT}/config"/{bazarr,jellyfin,jellyseerr,prowlarr,qbittorrent,radarr,recyclarr,sonarr}
+mkdir -p "${DEMO_ROOT}/config"/{bazarr,jellyfin,seerr,prowlarr,qbittorrent,radarr,recyclarr,sonarr}
 mkdir -p "${DEMO_ROOT}/config/homarr"/{configs,icons,data}
 mkdir -p "${DEMO_ROOT}/data/torrents"/{movies,tv}
 mkdir -p "${DEMO_ROOT}/media"/{movies,tv}
