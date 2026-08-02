@@ -78,16 +78,14 @@ services:
       - gluetun
     restart: unless-stopped
 
-  # Cloudflare Solver
+  # Cloudflare Solver (ByParr)
   flaresolverr:
-    image: ghcr.io/flaresolverr/flaresolverr:latest
+    image: ghcr.io/thephaseless/byparr:latest
     container_name: flaresolverr
     network_mode: "service:gluetun"
     shm_size: "1gb"
     environment:
       - LOG_LEVEL=info
-      - LOG_HTML=false
-      - CAPTCHA_SOLVER=none
       - TZ=${TZ}
     depends_on:
       - gluetun
