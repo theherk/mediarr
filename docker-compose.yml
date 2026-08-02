@@ -87,6 +87,12 @@ services:
     environment:
       - LOG_LEVEL=info
       - TZ=${TZ}
+    healthcheck:
+      test: ["CMD", "curl", "-sS", "-m", "60", "http://127.0.0.1:8191/health"]
+      interval: 5m
+      timeout: 65s
+      retries: 3
+      start_period: 90s
     depends_on:
       - gluetun
     restart: unless-stopped
