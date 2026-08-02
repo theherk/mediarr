@@ -53,6 +53,12 @@ services:
     volumes:
       - ${CONFIG_ROOT}/qbittorrent:/config
       - ${DATA_ROOT}:/downloads
+    mem_limit: 1g
+    cpuset: "0,1"
+    ulimits:
+      nofile:
+        soft: 4096
+        hard: 8192
     depends_on:
       - gluetun
     restart: unless-stopped
@@ -77,6 +83,7 @@ services:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: flaresolverr
     network_mode: "service:gluetun"
+    shm_size: "1gb"
     environment:
       - LOG_LEVEL=info
       - LOG_HTML=false
